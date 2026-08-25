@@ -1,0 +1,73 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: wagering-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: wagering
+      POSTGRES_PASSWORD: wagering
+      POSTGRES_DB: wagering
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wagering -d wagering"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  localstack:
+    image: localstack/localstack:3.8
+    container_name: wagering-localstack
+    restart: unless-stopped
+    environment:
+      SERVICES: sqs
+      DEBUG: 0
+      # sem persistência entre subidas — cada `docker compose up` recria as filas do zero,
+      # o que é intencional para o cenário de "reinício do serviço" dos testes
+      PERSISTENCE: 0
+    ports:
+      - "4566:4566"
+    volumes:
+      - "./localstack/init:/etc/localstack/init/ready.d"
+      - localstack_data:/var/lib/localstack
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wagering-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://wagering:wagering@postgres:5432/wagering
+      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      SQS_QUEUE_URL: http://localstack:4566/000000000000/wager-transactions.fifo
+      SQS_DLQ_URL: http://localstack:4566/000000000000/wager-transactions-dlq.fifo
+    ports:
+      - "3000:3000"
+    volumes:
+      # bind mount pro hot-reload funcionar durante o desenvolvimento;
+      # node_modules fica isolado num volume nomeado para não vazar
+      # binários do host (Windows) para dentro do container (Linux)
+      - .:/app
+      - app_node_modules:/app/node_modules
+
+volumes:
+  postgres_data:
+  localstack_data:
+  app_node_modules:
