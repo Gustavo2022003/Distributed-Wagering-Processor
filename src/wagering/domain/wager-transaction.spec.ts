@@ -1,11 +1,3 @@
-// src/wagering/domain/wager-transaction.spec.ts
-//
-// Cobertura obrigatória da seção 13 do README para WagerTransaction:
-//   - regras de BET, WIN, LOSS, REFUND, ROLLBACK
-//   - conflito de moeda (delegado ao Money, mas testado via propriedade)
-//   - idempotency key com payload divergente
-//   - invariantes de transição (estado terminal)
-
 import { describe, it, expect } from 'bun:test';
 import { Money } from '../../shared/money';
 import { FailureCode } from '../../shared/failure-codes';
