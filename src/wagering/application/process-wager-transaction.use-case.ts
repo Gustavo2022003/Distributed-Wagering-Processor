@@ -2,7 +2,7 @@ import { EntityManager } from '@mikro-orm/core';
 import { v4 as uuid } from 'uuid';
 import { Money, MoneyProps } from '../../shared/money';
 import { FailureCode } from '../../shared/failure-codes';
-import { WalletNotFoundError } from '../../shared/errors/domain-errors';
+import { TerminalBusinessError } from './errors';
 import {
   WagerTransaction,
   WagerTransactionKind,
@@ -130,7 +130,7 @@ export class ProcessWagerTransactionUseCase {
 
       const wallet = await this.walletRepo.findById(dto.walletId);
       if (!wallet) {
-        throw new WalletNotFoundError(dto.walletId);
+        throw new TerminalBusinessError(`Wallet not found: ${dto.walletId}`);
       }
 
       const kindResult = await this.applyKindRule(tx, wallet, reference, dto.now);

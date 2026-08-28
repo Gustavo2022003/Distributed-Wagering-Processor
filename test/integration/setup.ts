@@ -65,7 +65,16 @@ export async function setupTestDb(): Promise<TestDb> {
     }),
   )).QueueUrl!;
 
+  const consumerQueueName = 'wager-transactions-test.fifo';
+  const consumerQueueUrl = (await sqs.send(
+    new CreateQueueCommand({
+      QueueName: consumerQueueName,
+      Attributes: { FifoQueue: 'true', ContentBasedDeduplication: 'false' },
+    }),
+  )).QueueUrl!;
+
   process.env.WAGER_OUTBOX_QUEUE_URL = outboxQueueUrl;
+  process.env.WAGER_CONSUMER_QUEUE_URL = consumerQueueUrl;
 
   const em = orm.em.fork();
   active = {
@@ -92,22 +101,31 @@ export async function clearTables(em: EntityManager): Promise<void> {
                           wager_transactions, wallets RESTART IDENTITY CASCADE;`);
 }
 
+export async function clearAll(db: TestDb): Promise<void> {
+  await db.orm.em.execute(`TRUNCATE outbox_messages, inbox_messages, wallet_ledger_entries,
+                              wager_transactions, wallets RESTART IDENTITY CASCADE;`);
+  await purgeQueue(db.sqs, db.outboxQueueUrl);
+  await purgeQueue(db.sqs, process.env.WAGER_CONSUMER_QUEUE_URL!);
+}
+
 export function freshEm(db: TestDb): EntityManager {
   return db.orm.em.fork();
 }
 
 export async function purgeQueue(sqs: SQSClient, queueUrl: string): Promise<void> {
+  if (!queueUrl) return;
   try {
     let drained = true;
-    while (drained) {
+    let safety = 100;
+    while (drained && safety-- > 0) {
       drained = false;
-      // Receive and delete in a loop until empty
       const { ReceiveMessageCommand, DeleteMessageCommand } = await import('@aws-sdk/client-sqs');
       const out = await sqs.send(
         new ReceiveMessageCommand({
           QueueUrl: queueUrl,
           MaxNumberOfMessages: 10,
           WaitTimeSeconds: 0,
+          VisibilityTimeout: 0,
         }),
       );
       for (const msg of out.Messages ?? []) {
@@ -120,4 +138,28 @@ export async function purgeQueue(sqs: SQSClient, queueUrl: string): Promise<void
   } catch {
     // queue may not exist yet
   }
+}
+
+export async function sendMessage(
+  sqs: SQSClient,
+  queueUrl: string,
+  body: string,
+  groupId: string,
+  messageDeduplicationId: string,
+): Promise<void> {
+  const { SendMessageCommand } = await import('@aws-sdk/client-sqs');
+  const useQueueUrl = process.env.AWS_ENDPOINT_URL ? true : false;
+  await sqs.send(
+    new SendMessageCommand({
+      QueueUrl: queueUrl,
+      MessageBody: body,
+      MessageGroupId: groupId,
+      MessageDeduplicationId: messageDeduplicationId,
+    }),
+    { useQueueUrlAsEndpoint: useQueueUrl } as any,
+  );
+}
+
+export async function getConsumerQueueUrl(db: TestDb): Promise<string> {
+  return process.env.WAGER_CONSUMER_QUEUE_URL!;
 }

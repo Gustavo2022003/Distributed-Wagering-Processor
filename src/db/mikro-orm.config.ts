@@ -20,10 +20,9 @@ export const mikroOrmConfig = defineConfig({
   dbName: process.env.DATABASE_URL ? undefined : 'wagering',
   clientUrl: process.env.DATABASE_URL,
   pool: {
-    // Permite múltiplas transações paralelas (cenários de concorrência).
-    // 20 é o suficiente pra testes de até ~20 exec simultâneos.
-    max: 20,
-    min: 2,
+    min: 0,
+    max: 10,
+    acquireTimeout: 5_000,
   },
   extensions: [Migrator],
   migrations: {

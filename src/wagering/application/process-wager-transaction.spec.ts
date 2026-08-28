@@ -8,7 +8,7 @@ import {
   PayloadConflictError,
 } from '../domain/wager-transaction';
 import { Wallet } from '../../wallet/domain/wallet';
-import { WalletNotFoundError } from '../../shared/errors/domain-errors';
+import { TerminalBusinessError } from './errors';
 import { ProcessWagerTransactionUseCase, type ProcessWagerTransactionDto } from './process-wager-transaction.use-case';
 
 class FakeEm {
@@ -413,10 +413,10 @@ describe('ProcessWagerTransactionUseCase', () => {
   });
 
   describe('Validações de entrada', () => {
-    it('Wallet não encontrada → WalletNotFoundError', async () => {
+    it('Wallet não encontrada → TerminalBusinessError', async () => {
       const { useCase } = makeUseCase();
 
-      await expect(useCase.execute(baseDto())).rejects.toThrow(WalletNotFoundError);
+      await expect(useCase.execute(baseDto())).rejects.toThrow(TerminalBusinessError);
     });
   });
 });
