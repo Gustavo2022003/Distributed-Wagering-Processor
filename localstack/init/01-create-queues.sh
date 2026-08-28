@@ -21,5 +21,15 @@ awslocal sqs create-queue \
     \"RedrivePolicy\": \"{\\\"deadLetterTargetArn\\\":\\\"${DLQ_ARN}\\\",\\\"maxReceiveCount\\\":\\\"5\\\"}\"
   }"
 
+# Fila de outbox — onde o publisher worker publica os eventos.
+# FIFO pra preservar ordem por aggregateId; ContentBasedDeduplication off
+# porque o eventId (dedup) vem do payload, não do body hash.
+awslocal sqs create-queue \
+  --queue-name wager-outbox.fifo \
+  --attributes '{
+    "FifoQueue": "true",
+    "ContentBasedDeduplication": "false"
+  }'
+
 echo "Filas criadas:"
 awslocal sqs list-queues

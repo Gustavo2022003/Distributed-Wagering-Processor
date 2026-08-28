@@ -27,6 +27,7 @@
     "migration:pending": "bunx mikro-orm migration:pending"
   },
   "dependencies": {
+    "@aws-sdk/client-sqs": "^3.1120.0",
     "@mikro-orm/core": "^7.1.14",
     "@mikro-orm/decorators": "^7.1.14",
     "@mikro-orm/migrations": "^7.1.14",
@@ -50,6 +51,7 @@
     "@mikro-orm/cli": "^7.1.14",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
+    "@testcontainers/localstack": "^12.1.0",
     "@testcontainers/postgresql": "^12.1.0",
     "@types/express": "^5.0.0",
     "@types/node": "^24.0.0",
