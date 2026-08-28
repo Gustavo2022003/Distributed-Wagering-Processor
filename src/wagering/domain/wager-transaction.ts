@@ -91,6 +91,9 @@ export interface WagerTransactionState {
   referenceTransactionId: string | undefined;
   failureCode: FailureCode | undefined;
   processedAt: Date | undefined;
+  correlationId?: string;
+  attempts?: number;
+  nextAttemptAt?: Date;
 }
 
 
@@ -130,12 +133,15 @@ export class WagerTransaction {
   public readonly money: Money;
   public readonly referenceExternalTransactionId: string | undefined;
   public readonly createdAt: Date;
+  public readonly correlationId?: string;
 
   // Estado mutável de transição (mas o objeto NÃO é mutável fora dos métodos)
   private _status: WagerTransactionStatus;
   private _referenceTransactionId: string | undefined;
   private _failureCode: FailureCode | undefined;
   private _processedAt: Date | undefined;
+  private _attempts: number;
+  private _nextAttemptAt: Date | undefined;
 
   // ─── factories ──────────────────────────────────────────────────────────
 
@@ -157,6 +163,9 @@ export class WagerTransaction {
     this._referenceTransactionId = state.referenceTransactionId;
     this._failureCode = state.failureCode;
     this._processedAt = state.processedAt;
+    this.correlationId = state.correlationId;
+    this._attempts = state.attempts ?? 0;
+    this._nextAttemptAt = state.nextAttemptAt;
   }
 
 
@@ -254,6 +263,14 @@ export class WagerTransaction {
     return this._processedAt;
   }
 
+  get attempts(): number {
+    return this._attempts;
+  }
+
+  get nextAttemptAt(): Date | undefined {
+    return this._nextAttemptAt;
+  }
+
   // ─── transições ─────────────────────────────────────────────────────────
 
   private assertNotTerminal(): void {
@@ -273,9 +290,15 @@ export class WagerTransaction {
     this._failureCode = undefined;
   }
 
-  markPendingReference(): void {
+  markPendingReference(now: Date, baseBackoffMs: number, maxBackoffMs: number): void {
     this.assertNotTerminal();
     this._status = WagerTransactionStatus.PendingReference;
+    this._nextAttemptAt = computeNextAttempt(this.createdAt, now, this._attempts, baseBackoffMs, maxBackoffMs);
+  }
+
+  schedulePendingReferenceRetry(now: Date, baseBackoffMs: number, maxBackoffMs: number): void {
+    this._attempts += 1;
+    this._nextAttemptAt = computeNextAttempt(this.createdAt, now, this._attempts, baseBackoffMs, maxBackoffMs);
   }
 
   reject(code: FailureCode, at: Date): void {
@@ -371,4 +394,15 @@ function canonicalize(value: unknown): unknown {
 
 function computeOpeningHash(id: string): string {
   return createHash('sha256').update(`opening:${id}`).digest('hex');
+}
+
+export function computeNextAttempt(
+  createdAt: Date,
+  now: Date,
+  attempts: number,
+  baseBackoffMs: number,
+  maxBackoffMs: number,
+): Date {
+  const exp = Math.min(Math.pow(2, attempts) * baseBackoffMs, maxBackoffMs);
+  return new Date(now.getTime() + exp);
 }

@@ -1,8 +1,3 @@
-// src/db/mikro-orm.config.ts
-//
-// Config do MikroORM para o CLI (migrations) e para o runtime.
-// O DATABASE_URL vem do env. Em testes, é sobrescrito pelo test helper.
-
 import { defineConfig } from '@mikro-orm/core';
 import { PostgreSqlDriver } from '@mikro-orm/postgresql';
 import { Migrator, TSMigrationGenerator } from '@mikro-orm/migrations';
@@ -24,6 +19,12 @@ export const mikroOrmConfig = defineConfig({
   ],
   dbName: process.env.DATABASE_URL ? undefined : 'wagering',
   clientUrl: process.env.DATABASE_URL,
+  pool: {
+    // Permite múltiplas transações paralelas (cenários de concorrência).
+    // 20 é o suficiente pra testes de até ~20 exec simultâneos.
+    max: 20,
+    min: 2,
+  },
   extensions: [Migrator],
   migrations: {
     path: './src/migrations',

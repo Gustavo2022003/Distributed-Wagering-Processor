@@ -28,6 +28,9 @@ export const WagerTransactionMapper = {
       referenceTransactionId: entity.referenceTransactionId,
       failureCode: (entity.failureCode as any) ?? undefined,
       processedAt: entity.processedAt,
+      correlationId: entity.correlationId,
+      attempts: entity.attempts,
+      nextAttemptAt: entity.nextAttemptAt,
     });
   },
 
@@ -46,11 +49,14 @@ export const WagerTransactionMapper = {
     e.moneyAmount = domain.money.amount;
     e.moneyCurrency = domain.money.currency;
     e.referenceExternalTransactionId = domain.referenceExternalTransactionId;
-    e.referenceTransactionId = undefined; // preenchido depois pelo resolver
+    e.referenceTransactionId = undefined;
     e.createdAt = domain.createdAt;
     e.status = domain.status;
     e.failureCode = domain.failureCode as any;
     e.processedAt = domain.processedAt;
+    e.correlationId = domain.correlationId;
+    e.attempts = domain.attempts;
+    e.nextAttemptAt = domain.nextAttemptAt;
     return e;
   },
 

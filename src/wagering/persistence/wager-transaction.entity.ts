@@ -21,6 +21,10 @@ import { v4 as uuid } from 'uuid';
   name: 'ix_wtx_status_created',
   properties: ['status', 'createdAt'],
 })
+@Index({
+  name: 'ix_wtx_pending_retry',
+  properties: ['status', 'nextAttemptAt'],
+})
 @Check({
   name: 'ck_wtx_kind',
   expression: "kind IN ('OPENING','BET','WIN','LOSS','REFUND','ROLLBACK')",
@@ -90,6 +94,15 @@ export class WagerTransactionEntity {
 
   @Property({ type: 'timestamptz', name: 'processed_at', nullable: true })
   processedAt?: Date;
+
+  @Property({ type: 'varchar', length: 64, name: 'correlation_id', nullable: true })
+  correlationId?: string;
+
+  @Property({ type: 'int', default: 0 })
+  attempts!: number;
+
+  @Property({ type: 'timestamptz', name: 'next_attempt_at', nullable: true })
+  nextAttemptAt?: Date;
 
   static newId(): string {
     return uuid();

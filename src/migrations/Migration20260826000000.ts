@@ -1,8 +1,3 @@
-// src/migrations/Migration20260826000000.ts
-//
-// Migration inicial. Cria o schema completo do sistema.
-// Em MikroORM 7 a API é `addSql(query)` em vez de receber Knex.
-
 import { Migration } from '@mikro-orm/migrations';
 
 export class Migration20260826000000 extends Migration {
@@ -111,8 +106,8 @@ export class Migration20260826000000 extends Migration {
         event_id UUID NOT NULL,
         aggregate_id UUID NOT NULL,
         event_type VARCHAR(64) NOT NULL,
-        correlation_id UUID NOT NULL,
-        causation_id UUID,
+        correlation_id VARCHAR(64) NOT NULL,
+        causation_id VARCHAR(64),
         payload JSONB NOT NULL,
         occurred_at TIMESTAMPTZ NOT NULL,
         attempts INTEGER NOT NULL DEFAULT 0,

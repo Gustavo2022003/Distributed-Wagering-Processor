@@ -151,9 +151,10 @@ describe('WagerTransaction transitions', () => {
 
   it('moves PENDING → PENDING_REFERENCE on markPendingReference', () => {
     const tx = makeRefundTx();
-    tx.markPendingReference();
+    tx.markPendingReference(FIXED_DATE, 2_000, 900_000);
     expect(tx.status).toBe(WagerTransactionStatus.PendingReference);
     expect(tx.processedAt).toBeUndefined();
+    expect(tx.nextAttemptAt).toBeDefined();
   });
 
   it('moves PENDING → REJECTED on reject(code)', () => {
@@ -176,7 +177,7 @@ describe('WagerTransaction transitions', () => {
     tx.markProcessed(undefined, FIXED_DATE);
     expect(() => tx.reject(FailureCode.InsufficientFunds, FIXED_DATE))
       .toThrow(InvalidTransactionStateError);
-    expect(() => tx.markPendingReference())
+    expect(() => tx.markPendingReference(FIXED_DATE, 2_000, 900_000))
       .toThrow(InvalidTransactionStateError);
   });
 

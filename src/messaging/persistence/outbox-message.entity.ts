@@ -1,5 +1,3 @@
-// src/messaging/persistence/outbox-message.entity.ts
-
 import { Entity, PrimaryKey, Property, Index, Unique } from '@mikro-orm/decorators/legacy';
 import { v4 as uuid } from 'uuid';
 
@@ -22,10 +20,10 @@ export class OutboxMessageEntity {
   @Property({ type: 'varchar', length: 64, name: 'event_type' })
   eventType!: string;
 
-  @Property({ type: 'uuid', name: 'correlation_id' })
+  @Property({ type: 'varchar', length: 64, name: 'correlation_id' })
   correlationId!: string;
 
-  @Property({ type: 'uuid', name: 'causation_id', nullable: true })
+  @Property({ type: 'varchar', length: 64, name: 'causation_id', nullable: true })
   causationId?: string;
 
   @Property({ type: 'jsonb' })
