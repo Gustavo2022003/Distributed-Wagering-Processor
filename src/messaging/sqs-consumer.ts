@@ -3,7 +3,7 @@ import {
   ReceiveMessageCommand,
   DeleteMessageCommand,
 } from '@aws-sdk/client-sqs';
-import type { SqsConsumer, SqsMessage } from './sqs-consumer.types';
+import type { SqsConsumer, SqsMessage } from './sqs-consumer.contract';
 
 export interface SqsConsumerClientOptions {
   client?: SQSClient;

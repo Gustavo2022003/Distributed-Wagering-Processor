@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { EntityManager } from '@mikro-orm/core';
 import { PublishOutboxUseCase } from './publish-outbox.use-case';
 import { OutboxRepository } from '../persistence/outbox.repository';
-import { OutboxPublisher } from '../outbox-publisher.port';
+import { OutboxPublisher } from '../i-outbox-publisher';
 
 @Injectable()
 export class OutboxPublisherWorker {

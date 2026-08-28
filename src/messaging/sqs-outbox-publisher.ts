@@ -1,6 +1,6 @@
 import { SQSClient, SendMessageCommand } from '@aws-sdk/client-sqs';
 import { OutboxMessage } from '../domain/outbox-message';
-import { OutboxPublisher } from './outbox-publisher.port';
+import { OutboxPublisher } from './i-outbox-publisher';
 
 export interface SqsOutboxPublisherOptions {
   client?: SQSClient;

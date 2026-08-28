@@ -1,6 +1,6 @@
 import { EntityManager } from '@mikro-orm/core';
 import { OutboxRepository } from '../persistence/outbox.repository';
-import { OutboxPublisher } from '../outbox-publisher.port';
+import { OutboxPublisher } from '../i-outbox-publisher';
 
 export const OUTBOX_PUBLISHER_BASE_BACKOFF_MS = 2_000;
 export const OUTBOX_PUBLISHER_MAX_BACKOFF_MS = 15 * 60 * 1_000;

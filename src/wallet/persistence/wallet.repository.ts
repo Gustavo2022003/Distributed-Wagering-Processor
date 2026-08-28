@@ -11,6 +11,11 @@ export class WalletRepository {
     return entity ? WalletMapper.toDomain(entity) : null;
   }
 
+  async findByPlayerCurrency(playerId: string, currency: string): Promise<Wallet | null> {
+    const entity = await this.em.findOne(WalletEntity, { playerId, currency });
+    return entity ? WalletMapper.toDomain(entity) : null;
+  }
+
   async insert(wallet: Wallet): Promise<void> {
     const entity = WalletMapper.toEntity(wallet);
     this.em.persist(entity);

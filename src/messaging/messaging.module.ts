@@ -4,7 +4,7 @@ import { MessagingService } from './messaging.service';
 import { MessagingController } from './messaging.controller';
 import { OutboxPublisherWorker } from './application/outbox-publisher.worker';
 import { OutboxRepository } from './persistence/outbox.repository';
-import { OutboxPublisher } from './outbox-publisher.port';
+import { OutboxPublisher } from './i-outbox-publisher';
 import { SqsOutboxPublisher } from './sqs-outbox-publisher';
 
 const outboxQueueUrl =

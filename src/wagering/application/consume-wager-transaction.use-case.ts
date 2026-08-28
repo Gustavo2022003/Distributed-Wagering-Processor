@@ -18,7 +18,7 @@ import { v4 as uuid } from 'uuid';
 import { Money } from '../../shared/money';
 import { ProcessWagerTransactionUseCase, type ProcessWagerTransactionDto } from './process-wager-transaction.use-case';
 import { TerminalBusinessError, TransientInfraError, PermanentInfraError } from './errors';
-import type { SqsConsumer, SqsMessage } from '../../messaging/sqs-consumer.types';
+import type { SqsConsumer, SqsMessage } from '../../messaging/sqs-consumer.contract';
 import { InboxMessageRepository } from '../../messaging/persistence/inbox-message.repository';
 import { WagerTransactionRequestedMessage } from './sqs-message';
 

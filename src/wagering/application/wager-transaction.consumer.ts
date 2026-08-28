@@ -3,7 +3,7 @@
 import { Injectable, Logger, OnApplicationShutdown } from '@nestjs/common';
 import { EntityManager } from '@mikro-orm/core';
 import { ConsumeWagerTransactionUseCase } from './consume-wager-transaction.use-case';
-import type { SqsConsumer } from '../../messaging/sqs-consumer.types';
+import type { SqsConsumer } from '../../messaging/sqs-consumer.contract';
 import { InboxMessageRepository } from '../../messaging/persistence/inbox-message.repository';
 import { ProcessWagerTransactionUseCase } from './process-wager-transaction.use-case';
 import { WalletRepository } from '../../wallet/persistence/wallet.repository';
